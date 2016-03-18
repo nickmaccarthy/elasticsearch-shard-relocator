@@ -1,0 +1,19 @@
+# The address(s) you connect to your cluster with
+cluster_address:
+    - https://your.elasticsearch.cluster.com
+
+
+# The names of your data nodes as they exist in your cluster.  
+# The script will randomly pick one of these to reassign your shard to
+# Note the name here must be the name in ES
+data_nodes: 
+   - eshdn01-es1
+   - eshdn02-es1
+   - eshdn03-es1
+   - eshdn04-es1
+   - eshdn05-es1
+   - eshdn06-es1
+   - eshdn07-es1
+   - eshdn08-es1
+   - eshdn09-es1
+        

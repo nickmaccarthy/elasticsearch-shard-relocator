@@ -1,0 +1,4 @@
+*.pyc
+*.swp
+env
+es_hosts.yml
