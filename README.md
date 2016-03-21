@@ -23,7 +23,10 @@ Sometimes shards become unassigned due to issues with the cluster.  ES usually d
 
 
 # Requirements
-1. Python 2.7
+1. Python 2.7 ( might work with 3, but havent tested )
 2. Virtualenv
 3. Pip
 4. An Elasticsearch cluster
+
+# New Features
+1.) Added the ability to specify '_all_data_nodes' in hosts.yml.  This will run nodeclient.info() and determine all 'data nodes' in your cluster that will be eligable for shard reassingment

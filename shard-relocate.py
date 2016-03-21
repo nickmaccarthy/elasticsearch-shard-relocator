@@ -8,7 +8,7 @@
 '''
 
 from elasticsearch import Elasticsearch
-from elasticsearch.client import CatClient, ClusterClient
+from elasticsearch.client import CatClient, ClusterClient, NodesClient
 import random
 import time
 import sys
@@ -19,15 +19,32 @@ def config():
         doc = yaml.load(f)
     return doc
 
+def get_data_nodes(es):
+    ''' returns a list of all data nodes in a cluster '''
+    nodes = NodesClient(es)
+    data_nodes = []
+    for nodeid, info in nodes.info()['nodes'].iteritems():
+        name = info['settings']['node']['name']
+        if info['settings']['node']['data'] == 'true':
+            data_nodes.append(name)
+    data_nodes.sort()
+    return data_nodes
+
 def relocate():
     conf = config()
 
-    print conf['cluster_address']
-    es = Elasticsearch(conf['cluster_address'])
-    escat = CatClient(es)
-    escluster = ClusterClient(es)
+    try:
+        es = Elasticsearch(conf['cluster_address'])
+        escat = CatClient(es)
+        escluster = ClusterClient(es)
+    except Exception, e:
+        print("Unable to connect to ES cluster. Reason: {}".format(e))
+        sys.exit(1)
 
-    eshosts = conf['data_nodes']
+    if conf['data_nodes'] == '_all_data_nodes_':
+        eshosts = get_data_nodes(es)
+    else:
+        eshosts = conf['data_nodes']
 
     def get_unassigned(d):
         if d.get('state') == 'UNASSIGNED':
@@ -56,13 +73,11 @@ def relocate():
         print bodyd
         try:
             escluster.reroute(body=bodyd)
-            print "{2} of {3} - All good with shard: {0}, index: {1}".format(s.get('shard'), s.get('index'), index, shardlen)
+            print("{2} of {3} - All good with shard: {0}, index: {1}".format(s.get('shard'), s.get('index'), index, shardlen))
         except Exception, e:
-            print "{2} of {3} - Was unable to re-allocate shard: shard: {0}, reason: {1}".format(s, e, index, shardlen)
+            print("{2} of {3} - Was unable to re-allocate shard: shard: {0}, reason: {1}".format(s, e, index, shardlen))
 
-        time.sleep(5)
-
-
+        time.sleep(3)
 
 if __name__ == "__main__":
     relocate()
