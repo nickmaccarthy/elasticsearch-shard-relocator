@@ -1,4 +1,4 @@
 elasticsearch==2.3.0
-PyYAML==3.11
+PyYAML==5.4
 urllib3==1.14
 wheel==0.24.0
